@@ -28,7 +28,7 @@ if (!threadID) throw new Error('THREAD_ID is undefined.')
 cron.schedule(
 	'30 5 * * *',
 	async () => {
-		await randomSleepMinutes(1, 2, 2)
+		await randomSleepMinutes(1, 6, 2)
 
 		void api.sendMessage({sticker: thumbsUpSticker}, threadID)
 
