@@ -14,6 +14,8 @@ const api = await login({
 
 if (!api) throw new Error('API failed to initialize.')
 
+console.log(`Logged in as ${process.env.EMAIL}`)
+
 const listener = await api.listen()
 
 listener.addListener('message', (message) => {
@@ -26,9 +28,9 @@ const threadID = process.env.THREAD_ID
 if (!threadID) throw new Error('THREAD_ID is undefined.')
 
 cron.schedule(
-	'30 5 * * *',
+	'25 5 * * *',
 	async () => {
-		await randomSleepMinutes(1, 6, 2)
+		await randomSleepMinutes(1, 10, 2)
 
 		void api.sendMessage({sticker: thumbsUpSticker}, threadID)
 
