@@ -16,11 +16,13 @@
   "dependencies": {
     "dotenv": "^10.0.0",
     "node-cron": "^3.0.0",
+    "prompts": "^2.4.1",
     "ts-messenger-api": "^1.0.3"
   },
   "devDependencies": {
     "@types/node": "^15.12.2",
     "@types/node-cron": "^2.0.3",
+    "@types/prompts": "^2.0.13",
     "typescript": "^4.3.2",
     "xo": "^0.40.2"
   },

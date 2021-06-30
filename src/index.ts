@@ -1,20 +1,52 @@
 import facebookLogin from 'ts-messenger-api'
+import Api from 'ts-messenger-api/dist/lib/api'
 import dotenv from 'dotenv'
 import cron from 'node-cron'
+import prompts, {PromptObject} from 'prompts'
 
 dotenv.config()
 
 // @ts-expect-error
-const login: typeof facebookLogin = facebookLogin.default as Promise<Api | undefined>
+const fbLogin: typeof facebookLogin = facebookLogin.default as Promise<Api | undefined>
 
-const api = await login({
-	email: process.env.EMAIL,
-	password: process.env.PASSWORD
-})
+const loginQuestions: PromptObject[] = [
+	{
+		type: 'text',
+		name: 'email',
+		message: 'Enter your Facebook login email.'
+	},
+	{
+		type: 'password',
+		name: 'password',
+		message: 'Enter your password.'
+	}
+]
 
-if (!api) throw new Error('API failed to initialize.')
+let responses
+let api: Api
 
-console.log(`Logged in as ${process.env.EMAIL}`)
+while (true) {
+	responses = await prompts(loginQuestions)
+
+	const login = await fbLogin({
+		email: responses.email,
+		password: responses.password
+	}).catch((error) => {
+		if (error.error) console.error(error.error)
+		else throw error
+	})
+
+	if (!login) continue
+
+	api = login
+	break
+}
+
+console.log(`Logged in as ${responses.email}`)
+
+const threadID = process.env.THREAD_ID
+
+if (!threadID) throw new Error('THREAD_ID is undefined.')
 
 const listener = await api.listen()
 
@@ -23,12 +55,9 @@ listener.addListener('message', (message) => {
 })
 
 const thumbsUpSticker = 369_239_263_222_822
-const threadID = process.env.THREAD_ID
-
-if (!threadID) throw new Error('THREAD_ID is undefined.')
 
 cron.schedule(
-	'25 5 * * *',
+	'10 5 * * *',
 	async () => {
 		await randomSleepMinutes(1, 10, 2)
 
