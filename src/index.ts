@@ -92,7 +92,7 @@ while (true) {
 		{logLevel: `silent`}
 	).catch((error) => {
 		if (error.error && Object.keys(loginResponses).length === 0) throw Util.error(error.error)
-		if (error.error) console.error(error.error)
+		if (error.error) log(c`{${cError} ${error.error}}`)
 		else throw error
 	})
 
