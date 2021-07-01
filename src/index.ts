@@ -11,12 +11,12 @@ const fbLogin: typeof facebookLogin = facebookLogin.default as Promise<Api | und
 
 const loginPrompts: PromptObject[] = [
 	{
-		type: () => !process.env.EMAIL ? 'text' : null,
+		type: () => (!process.env.EMAIL ? 'text' : null),
 		name: 'email',
 		message: 'Enter your Facebook login email.'
 	},
 	{
-		type: () => !process.env.PASSWORD ? 'password' : null,
+		type: () => (!process.env.PASSWORD ? 'password' : null),
 		name: 'password',
 		message: 'Enter your password.'
 	}
@@ -34,7 +34,7 @@ while (true) {
 		email,
 		password
 	}).catch((error) => {
-		if (error.error && (process.env.EMAIL && process.env.PASSWORD)) throw new Error(error.error)
+		if (error.error && process.env.EMAIL && process.env.PASSWORD) throw new Error(error.error)
 		if (error.error) console.error(error.error)
 		else throw error
 	})
@@ -50,20 +50,20 @@ const timeRegex = /^((([01]\d)|(2[0-3])):?([0-5]\d))/
 
 const configPrompts: PromptObject[] = [
 	{
-		type: () => !process.env.MESSAGE ? 'text' : null,
+		type: () => (!process.env.MESSAGE ? 'text' : null),
 		name: 'message',
 		message:
 			'Enter your message. Type "like" (without quotes) to send the default like/thumbs-up sticker.'
 	},
 	{
-		type: () => !process.env.TIME ? 'text' : null,
+		type: () => (!process.env.TIME ? 'text' : null),
 		name: 'time',
 		message:
 			'Enter the time you want the message to be sent. (Must be in 24h time format. e.g. 0530 or 1730)',
 		validate: (time) => (timeRegex.test(time) ? true : 'Not a valid time.')
 	},
 	{
-		type: () => !process.env.MAX_DELAY ? 'number' : null,
+		type: () => (!process.env.MAX_DELAY ? 'number' : null),
 		name: 'delay',
 		message: 'Enter the maximum number of minutes for the randomized delay. (Must be less than 60)',
 		validate: (delay) => (delay > 0 && delay < 60 ? true : 'Not a valid delay.')
@@ -77,13 +77,23 @@ const configPrompts: PromptObject[] = [
 
 const configResponses = await prompts(configPrompts)
 
-const messageObject = process.env.MESSAGE ? ((process.env.MESSAGE === 'like'
-? {sticker: 369_239_263_222_822}
-: {body: process.env.MESSAGE})) : (configResponses.message === 'like'
-? {sticker: 369_239_263_222_822}
-: {body: configResponses.message})
-const message = Object.values(messageObject)[0] === 369_239_263_222_822 ? "like/thumbs-up sticker" : `"${Object.values(messageObject)[0]}"`
-const time = process.env.TIME ? timeRegex.exec(process.env.TIME) : timeRegex.exec(configResponses.time)
+const messageObject = process.env.MESSAGE
+	? process.env.MESSAGE === 'like'
+		? {sticker: 369_239_263_222_822}
+		: {body: process.env.MESSAGE}
+	: configResponses.message === 'like'
+	? {sticker: 369_239_263_222_822}
+	: {body: configResponses.message}
+
+const message =
+	Object.values(messageObject)[0] === 369_239_263_222_822
+		? 'like/thumbs-up sticker'
+		: `"${Object.values(messageObject)[0]}"`
+
+const time = process.env.TIME
+	? timeRegex.exec(process.env.TIME)
+	: timeRegex.exec(configResponses.time)
+
 const delay = process.env.MAX_DELAY ? process.env.MAX_DELAY : configResponses.delay
 const threadID = process.env.THREAD_ID ? process.env.THREAD_ID : configResponses.threadID
 
@@ -94,8 +104,8 @@ let minute = Number(time[5]) + delayMinutes
 
 if (minute > 59) {
 	hour++
-	minute = minute - 60
-	if (hour > 23) hour = hour - 24
+	minute -= 60
+	if (hour > 23) hour -= 24
 }
 
 const sendTime = new Date(0, 0, 1, hour, minute, seconds).toLocaleTimeString()
@@ -115,7 +125,7 @@ listener.addListener('message', (message) => {
 })
 
 cron.schedule(`${seconds} ${minute} ${hour} * * *`, async () => {
-	//void api.sendMessage(messageObject, threadID)
+	// Void api.sendMessage(messageObject, threadID)
 	console.log(`Would have sent ${message}`)
 
 	console.log(`Sent ${message} to "${thread}" at ${new Date().toLocaleString()}.`)
