@@ -11,27 +11,30 @@ const fbLogin: typeof facebookLogin = facebookLogin.default as Promise<Api | und
 
 const loginPrompts: PromptObject[] = [
 	{
-		type: 'text',
+		type: () => !process.env.EMAIL ? 'text' : null,
 		name: 'email',
 		message: 'Enter your Facebook login email.'
 	},
 	{
-		type: 'password',
+		type: () => !process.env.PASSWORD ? 'password' : null,
 		name: 'password',
 		message: 'Enter your password.'
 	}
 ]
 
-let loginResponses
 let api: Api
 
 while (true) {
-	loginResponses = await prompts(loginPrompts)
+	const loginResponses = await prompts(loginPrompts)
+
+	const email = process.env.EMAIL ? process.env.EMAIL : loginResponses.email
+	const password = process.env.PASSWORD ? process.env.PASSWORD : loginResponses.password
 
 	const login = await fbLogin({
-		email: loginResponses.email,
-		password: loginResponses.password
+		email,
+		password
 	}).catch((error) => {
+		if (error.error && (process.env.EMAIL && process.env.PASSWORD)) throw new Error(error.error)
 		if (error.error) console.error(error.error)
 		else throw error
 	})
@@ -39,37 +42,34 @@ while (true) {
 	if (!login) continue
 
 	api = login
+	console.log(`Logged in as ${email}`)
 	break
 }
-
-console.log(`Logged in as ${loginResponses.email}`)
-
-let threadID = process.env.THREAD_ID
 
 const timeRegex = /^((([01]\d)|(2[0-3])):?([0-5]\d))/
 
 const configPrompts: PromptObject[] = [
 	{
-		type: 'text',
+		type: () => !process.env.MESSAGE ? 'text' : null,
 		name: 'message',
 		message:
 			'Enter your message. Type "like" (without quotes) to send the default like/thumbs-up sticker.'
 	},
 	{
-		type: 'text',
+		type: () => !process.env.TIME ? 'text' : null,
 		name: 'time',
 		message:
 			'Enter the time you want the message to be sent. (Must be in 24h time format. e.g. 0530 or 1730)',
 		validate: (time) => (timeRegex.test(time) ? true : 'Not a valid time.')
 	},
 	{
-		type: 'number',
+		type: () => !process.env.MAX_DELAY ? 'number' : null,
 		name: 'delay',
 		message: 'Enter the maximum number of minutes for the randomized delay. (Must be less than 60)',
 		validate: (delay) => (delay > 0 && delay < 60 ? true : 'Not a valid delay.')
 	},
 	{
-		type: () => (!threadID ? 'number' : null),
+		type: () => (!process.env.THREAD_ID ? 'number' : null),
 		name: 'threadID',
 		message: 'Enter the thread ID. This is where your message will be sent.'
 	}
@@ -77,27 +77,33 @@ const configPrompts: PromptObject[] = [
 
 const configResponses = await prompts(configPrompts)
 
-const message =
-	configResponses.message === 'like'
-		? {sticker: 369_239_263_222_822}
-		: {body: configResponses.message}
+const messageObject = process.env.MESSAGE ? ((process.env.MESSAGE === 'like'
+? {sticker: 369_239_263_222_822}
+: {body: process.env.MESSAGE})) : (configResponses.message === 'like'
+? {sticker: 369_239_263_222_822}
+: {body: configResponses.message})
+const message = Object.values(messageObject)[0] === 369_239_263_222_822 ? "like/thumbs-up sticker" : `"${Object.values(messageObject)[0]}"`
+const time = process.env.TIME ? timeRegex.exec(process.env.TIME) : timeRegex.exec(configResponses.time)
+const delay = process.env.MAX_DELAY ? process.env.MAX_DELAY : configResponses.delay
+const threadID = process.env.THREAD_ID ? process.env.THREAD_ID : configResponses.threadID
 
-const time = timeRegex.exec(configResponses.time)
 if (!time) throw new Error('time is null.')
+const {delayMinutes, seconds} = randomDelay(1, delay)
+let hour = Number(time[2])
+let minute = Number(time[5]) + delayMinutes
 
-const hour = Number(time[2])
-const minute = Number(time[5])
-const sleepms = randomDelay(1, configResponses.delay)
-if (!threadID) threadID = configResponses.threadID
+if (minute > 59) {
+	hour++
+	minute = minute - 60
+	if (hour > 23) hour = hour - 24
+}
 
-if (!threadID) throw new Error('THREAD_ID is undefined.')
+const sendTime = new Date(0, 0, 1, hour, minute, seconds).toLocaleTimeString()
 
 const thread = (await api.getThreadInfo(threadID)).threadName
 if (!thread) throw new Error('Unable to get thread.')
 
-const baseSendTime = new Date(0, 0, 1, hour, minute)
-const sendTime = new Date(baseSendTime.getTime() + sleepms).toLocaleTimeString()
-
+console.log(`Random delay has been set to ${delayMinutes}m${seconds}s.`)
 console.log(
 	`Message will be sent to "${thread}" at ${sendTime}. Current time is ${new Date().toLocaleString()}.`
 )
@@ -108,14 +114,11 @@ listener.addListener('message', (message) => {
 	console.log(message)
 })
 
-cron.schedule(`${minute} ${hour} * * *`, async () => {
-	await sleep(sleepms)
+cron.schedule(`${seconds} ${minute} ${hour} * * *`, async () => {
+	//void api.sendMessage(messageObject, threadID)
+	console.log(`Would have sent ${message}`)
 
-	if (!threadID) throw new Error('THREAD_ID is undefined.')
-
-	void api.sendMessage(message, threadID)
-
-	console.log(`Sent message to "${thread}" at ${new Date().toLocaleString()}`)
+	console.log(`Sent ${message} to "${thread}" at ${new Date().toLocaleString()}.`)
 })
 
 // Min and Max included
@@ -124,17 +127,12 @@ function randomDelay(min: number, max: number) {
 		Math.random() < 0.5
 			? (1 - Math.random()) * (max - min) + min
 			: Math.random() * (max - min) + min
-	const sleepMinutes = Math.floor(random * 10) / 10
-	const ms = Math.round(sleepMinutes * 60_000)
 
-	const totalSeconds = Math.round(sleepMinutes * 60)
-	const minutes = Math.floor(sleepMinutes)
-	const seconds = totalSeconds - minutes * 60
+	const minutes = Math.floor(random * 10) / 10
+	const totalSeconds = Math.round(minutes * 60)
 
-	console.log(`Random delay has been set to ${minutes}m${seconds}s (${ms}ms).`)
-	return ms
-}
+	const delayMinutes = Math.floor(minutes)
+	const seconds = totalSeconds - delayMinutes * 60
 
-async function sleep(ms: number) {
-	return new Promise((resolve) => setTimeout(resolve, ms))
+	return {delayMinutes, seconds}
 }
