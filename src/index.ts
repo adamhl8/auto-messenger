@@ -19,7 +19,7 @@ async function run() {
 		THREAD_ID: ``,
 		MESSAGE: ``,
 		TIME: ``,
-		MAX_DELAY: 0
+		MAX_DELAY_MINUTES: 0
 	}
 
 	const parsed = dotenv.config().parsed
@@ -31,7 +31,8 @@ async function run() {
 		}
 
 		env.TIME = Util.validateTime(env.TIME) === true ? env.TIME : ``
-		env.MAX_DELAY = Util.validateDelay(env.MAX_DELAY) === true ? env.MAX_DELAY : 0
+		env.MAX_DELAY_MINUTES =
+			Util.validateDelay(env.MAX_DELAY_MINUTES) === true ? env.MAX_DELAY_MINUTES : 0
 
 		let envSet = false
 
@@ -125,7 +126,7 @@ async function run() {
 			validate: (time) => Util.validateTime(time)
 		},
 		{
-			type: () => (!env.MAX_DELAY ? `number` : null),
+			type: () => (!env.MAX_DELAY_MINUTES ? `number` : null),
 			name: `delay`,
 			message: `Enter the maximum number of minutes for the randomized delay. (Must be less than 60)`,
 			initial: 10,
@@ -141,10 +142,10 @@ async function run() {
 		env.MESSAGE === Util.likeStickerAlias ? `like/thumbs-up sticker` : `"${env.MESSAGE}"`
 	if (configResponses.time) env.TIME = configResponses.time
 	const timeMatch = Util.timeRegex.exec(env.TIME)
-	if (configResponses.delay) env.MAX_DELAY = configResponses.delay
+	if (configResponses.delay) env.MAX_DELAY_MINUTES = configResponses.delay
 
 	if (!timeMatch) throw Util.error(`Time is not valid.`)
-	const {delayMinutes, second} = Util.randomDelayMinutes(0, env.MAX_DELAY)
+	const {delayMinutes, second} = Util.randomDelayMinutes(0, env.MAX_DELAY_MINUTES)
 	const hour = Number(timeMatch[2])
 	const minute = Number(timeMatch[5]) + delayMinutes
 

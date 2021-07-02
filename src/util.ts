@@ -30,7 +30,7 @@ export interface envInterface {
 	THREAD_ID: string
 	MESSAGE: string
 	TIME: string
-	MAX_DELAY: number
+	MAX_DELAY_MINUTES: number
 }
 
 export function validateTime(time: string) {
