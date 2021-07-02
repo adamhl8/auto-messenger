@@ -68,6 +68,8 @@ async function run() {
 		}
 	}
 
+	log(Util.welcomeMessage)
+
 	const loginPrompts: Util.promptObject = [
 		{
 			type: () => (!env.EMAIL ? `text` : null),
@@ -122,7 +124,7 @@ async function run() {
 		{
 			type: () => (!env.TIME ? `text` : null),
 			name: `time`,
-			message: `Enter the time you want the message to be sent (random delay is added on top of this). (Must be in 24h time format. e.g. 0530 or 1730)`,
+			message: `Enter the time you want the message to be sent (random delay is added on top of this).\nMust be in 24h time format. e.g. 0530, 1730, etc.`,
 			validate: (time) => Util.validateTime(time)
 		},
 		{

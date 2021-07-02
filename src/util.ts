@@ -23,6 +23,11 @@ export const chalkNames = {
 	cBold: `bold`
 }
 
+export const welcomeMessage =
+c`\n{${chalkNames.cBold}.${chalkNames.cInfo} Welcome to auto-messenger.} This program allows you to automatically send a message (with a short randomized delay) to another Facebook user/chat group at a chosen time.
+You will automatically be logged out once your scheduled message is sent. Simply reopen the program to schedule another message.
+For more info/help, please see the GitHub repo: {${chalkNames.cBold}.${chalkNames.cName} https://github.com/adamhl8/auto-messenger}\n`
+
 export interface envInterface {
 	[key: string]: string | number
 	EMAIL: string
