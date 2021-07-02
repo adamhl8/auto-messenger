@@ -1,9 +1,6 @@
-import Api from 'ts-messenger-api/dist/lib/api'
 import prompts from 'prompts'
-import cron from 'node-cron'
 import dayjs from 'dayjs'
 import c from 'chalk'
-import {api, cronSendMessage} from './index.js'
 
 export const log = console.log
 export const timeRegex = /^((([01]\d)|(2[0-3])):?([0-5]\d))/
@@ -23,8 +20,8 @@ export const chalkNames = {
 	cBold: `bold`
 }
 
-export const welcomeMessage =
-c`\n{${chalkNames.cBold}.${chalkNames.cInfo} Welcome to auto-messenger.} This program allows you to automatically send a message (with a short randomized delay) to another Facebook user/chat group at a chosen time.
+export const welcomeMessage = c`\n{${chalkNames.cBold}.${chalkNames.cInfo} Welcome to auto-messenger.}
+This program allows you to automatically send a message (with a short randomized delay) to another Facebook user/chat group at a chosen time.
 You will automatically be logged out once your scheduled message is sent. Simply reopen the program to schedule another message.
 For more info/help, please see the GitHub repo: {${chalkNames.cBold}.${chalkNames.cName} https://github.com/adamhl8/auto-messenger}\n`
 
@@ -49,8 +46,7 @@ export function validateDelay(delay: number) {
 export type promptObject = prompts.PromptObject | prompts.PromptObject[]
 export async function prompt(questions: promptObject, options?: prompts.Options | undefined) {
 	if (options) options.onCancel = () => process.exit(0)
-	const responses = await prompts(questions, options)
-	return responses
+	return await prompts(questions, options)
 }
 
 // Min and Max included
@@ -77,8 +73,10 @@ export function getFormattedTime() {
 	return dayjs().format(dateFormatString)
 }
 
-export async function end(api: Api, cronTask: cron.ScheduledTask) {
-	if (cronTask) cronTask.stop()
+export async function exit() {
+	const {api, cronSendMessage} = await import('./index.js')
+
+	if (cronSendMessage) cronSendMessage.stop()
 
 	if (api) {
 		api.stopListening()
@@ -104,9 +102,9 @@ export function error(error: string) {
 
 process.on('uncaughtException', async (error) => {
 	log(c`{${chalkNames.cError} ${error}}`)
-	await end(api, cronSendMessage)
+	await exit()
 })
 
 process.on(`SIGINT`, async () => {
-	await end(api, cronSendMessage)
+	await exit()
 })

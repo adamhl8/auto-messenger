@@ -89,7 +89,7 @@ async function run() {
 		if (loginResponses.email) env.EMAIL = loginResponses.email
 		if (loginResponses.password) env.PASSWORD = loginResponses.password
 
-		log(c`{${cInfo} Logging in...}`)
+		log(c`\n{${cInfo} Logging in...}`)
 		const login = await fbLogin(
 			{
 				email: env.EMAIL,
@@ -105,7 +105,7 @@ async function run() {
 		if (!login) continue
 
 		api = login
-		log(c`Logged in as {${cSuccess} ${env.EMAIL}}`)
+		log(c`Logged in as {${cSuccess} ${env.EMAIL}}\n`)
 		break
 	}
 
@@ -118,8 +118,8 @@ async function run() {
 		{
 			type: () => (!env.MESSAGE ? `text` : null),
 			name: `message`,
-			message: `Enter your message. Type "like" (without quotes) to send the default like/thumbs-up sticker.`,
-			initial: `like`
+			message: `Enter your message. Type "${Util.likeStickerAlias}" (without quotes) to send the default like/thumbs-up sticker.`,
+			initial: `${Util.likeStickerAlias}`
 		},
 		{
 			type: () => (!env.TIME ? `text` : null),
@@ -140,12 +140,10 @@ async function run() {
 
 	if (configResponses.threadID) env.THREAD_ID = configResponses.threadID
 	if (configResponses.message) env.MESSAGE = configResponses.message
-	const logMessage =
-		env.MESSAGE === Util.likeStickerAlias ? `like/thumbs-up sticker` : `"${env.MESSAGE}"`
 	if (configResponses.time) env.TIME = configResponses.time
-	const timeMatch = Util.timeRegex.exec(env.TIME)
 	if (configResponses.delay) env.MAX_DELAY_MINUTES = configResponses.delay
 
+	const timeMatch = Util.timeRegex.exec(env.TIME)
 	if (!timeMatch) throw Util.error(`Time is not valid.`)
 	const {delayMinutes, second} = Util.randomDelayMinutes(0, env.MAX_DELAY_MINUTES)
 	const hour = Number(timeMatch[2])
@@ -154,7 +152,6 @@ async function run() {
 	const currentTime = Util.getTime()
 	let sendTime = currentTime.hour(hour).minute(minute).second(second)
 	if (sendTime.isBefore(currentTime)) sendTime = sendTime.add(1, `d`)
-
 	const sendTimeFormatted = sendTime.format(Util.dateFormatString)
 
 	const cronExp = `${sendTime.second()} ${sendTime.minute()} ${sendTime.hour()} * * *`
@@ -164,11 +161,31 @@ async function run() {
 		throw Util.error(`Unable to get thread info.`)
 	})
 	const threadName = threadInfo.threadName
+	const logMessage =
+		env.MESSAGE === Util.likeStickerAlias ? `(like/thumbs-up sticker)` : env.MESSAGE
 
-	log(c`Random delay has been set to {${cTime} ${delayMinutes}m${second}s}.`)
+	log(c`The random delay is {${cTime} ${delayMinutes}m${second}s}.`)
 	log(
-		c`Message will be sent to {${cName} ${threadName}} at {${cTime} ${sendTimeFormatted}}. Current time is {${cTime} ${Util.getFormattedTime()}}.`
+		c`\nThe following message will be sent to {${cName} ${threadName}} at {${cTime} ${sendTimeFormatted}}. Current time is {${cTime} ${Util.getFormattedTime()}}.`
 	)
+	log(c`{${cData} ${logMessage}}\n`)
+
+	const confirm = await Util.prompt({
+		type: 'toggle',
+		name: 'value',
+		message: 'Continue?',
+		initial: true,
+		active: 'yes',
+		inactive: 'exit'
+	})
+
+	if (!confirm.value) Util.exit()
+
+	log(c`\nMessage will be sent at {${cTime} ${sendTimeFormatted}}.`)
+	log(
+		c`{${cBold}.${cInfo} Please do not close this window.} It must remain open and you must have an internet connection.`
+	)
+	log(`...`)
 
 	const listener = await api.listen()
 
@@ -176,15 +193,15 @@ async function run() {
 		log(message)
 	})
 
+	const messageObject =
+		env.MESSAGE === `${Util.likeStickerAlias}` ? {sticker: Util.likeSticker} : {body: env.MESSAGE}
+
 	cronSendMessage = cron.schedule(cronExp, async () => {
-		const messageObject = env.MESSAGE === `like` ? {sticker: Util.likeSticker} : {body: env.MESSAGE}
-		// Await api.sendMessage(messageObject, threadID)
+		// Await api.sendMessage(messageObject, env.THREAD_ID)
 
-		log(
-			c`Sent {${cData} ${logMessage}} to {${cName} ${threadName}} at {${cTime} ${Util.getFormattedTime()}}.`
-		)
+		log(c`\nSent message to {${cName} ${threadName}} at {${cTime} ${Util.getFormattedTime()}}.\n`)
 
-		await Util.end(api, cronSendMessage)
+		await Util.exit()
 	})
 }
 
