@@ -1,9 +1,9 @@
-import facebookLogin from 'ts-messenger-api'
 import Api from 'ts-messenger-api/dist/lib/api'
 import prompts from 'prompts'
 import cron from 'node-cron'
 import dayjs from 'dayjs'
 import c from 'chalk'
+import {api, cronSendMessage} from './index.js'
 
 export const log = console.log
 export const timeRegex = /^((([01]\d)|(2[0-3])):?([0-5]\d))/
@@ -12,8 +12,9 @@ export const likeSticker = 369_239_263_222_822
 export const likeStickerAlias = `like`
 
 export const chalkNames = {
-	cError: `red`,
-	cWarning: `hex('#FFA500')`,
+	cError: `bold.red`,
+	cCaution: `red`,
+	cInfo: `hex('#FFA500')`,
 	cSuccess: `green`,
 	cProperty: `cyan`,
 	cData: `blue`,
@@ -47,9 +48,6 @@ export async function prompt(questions: promptObject, options?: prompts.Options 
 	return responses
 }
 
-// @ts-expect-error
-export const fbLogin: typeof facebookLogin = facebookLogin.default as Promise<Api | undefined>
-
 // Min and Max included
 export function randomDelayMinutes(min: number, max: number) {
 	const random =
@@ -74,18 +72,36 @@ export function getFormattedTime() {
 	return dayjs().format(dateFormatString)
 }
 
-export function error(message: string) {
-	return new Error(c.bold.red(message))
-}
+export async function end(api: Api, cronTask: cron.ScheduledTask) {
+	if (cronTask) cronTask.stop()
 
-export async function end(cron: cron.ScheduledTask, api: Api) {
-	cron.stop()
-	api.stopListening()
-	await api.logout()
-	log(c`{${chalkNames.cWarning} Logged out.}`)
+	if (api) {
+		api.stopListening()
+		await api.logout()
+		log(c`{${chalkNames.cInfo} Logged out.}`)
+	}
+
+	await exitPrompt()
 	process.exit(0)
 }
 
-process.on(`SIGINT`, () => {
-	process.exit(0)
+async function exitPrompt() {
+	await prompt({
+		type: `text`,
+		name: `value`,
+		message: `Press enter to exit.`
+	})
+}
+
+export function error(error: string) {
+	return new Error(c`{${chalkNames.cError} ${error}}`)
+}
+
+process.on('uncaughtException', async (error) => {
+	log(c`{${chalkNames.cError} ${error}}`)
+	await end(api, cronSendMessage)
+})
+
+process.on(`SIGINT`, async () => {
+	await end(api, cronSendMessage)
 })

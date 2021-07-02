@@ -1,15 +1,15 @@
 {
-  "name": "ts-node-template",
+  "name": "auto-messenger",
   "version": "0.1.0",
-  "repository": "https://github.com/adamhl8/ts-node-template",
+  "repository": "https://github.com/adamhl8/auto-messenger",
   "author": "adamhl8",
   "license": "MIT",
-  "main": "./dist/index.js",
   "exports": "./dist/index.js",
-  "type": "module",
+  "bin": "./dist/index.js",
   "scripts": {
     "start": "yarn build && node --enable-source-maps dist/index.js",
     "build": "tsc",
+    "pkg": "pkg . -t node16-win-x64,node16-macos-x64,node16-linux-x64 --compress GZip",
     "lint": "xo",
     "fix": "xo --fix"
   },
