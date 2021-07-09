@@ -1,4 +1,5 @@
 import c from 'chalk'
+import prompts from 'prompts'
 import { getCronJob } from './cron'
 import { getApi } from './login'
 import { cInfo } from './util/chalk-names'
@@ -9,6 +10,12 @@ export default async function exit(): Promise<void> {
   const cronJob = getCronJob()
 
   if (cronJob) cronJob.stop()
+
+  await prompts({
+    type: 'invisible',
+    name: 'value',
+    message: 'Press Enter to exit.',
+  })
 
   if (api) {
     api.stopListening()
