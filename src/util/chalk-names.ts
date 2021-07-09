@@ -1,0 +1,9 @@
+export const cError = 'bold.red'
+export const cCaution = 'red'
+export const cInfo = "hex('#FFA500')"
+export const cSuccess = 'green'
+export const cProperty = 'cyan'
+export const cData = 'blue'
+export const cName = 'magenta'
+export const cTime = 'yellow'
+export const cBold = 'bold'
