@@ -1,6 +1,9 @@
 import c from 'chalk'
 import prompts from 'prompts'
+import { ThreadID, ThreadInfo } from 'ts-messenger-api/dist/lib/types/threads'
+import { UserInfo } from 'ts-messenger-api/dist/lib/types/users'
 import exit from '../exit'
+import { getApi } from '../login'
 import { timeRegex } from '../time'
 import { cBold, cError, cInfo, cName } from './chalk-names'
 
@@ -31,16 +34,40 @@ export function formattedError(error: string): Error {
 
 export const promptsCancel = { onCancel: async (): Promise<void> => await exit() }
 
-export async function shouldContinue(): Promise<prompts.Answers<'value'>> {
+export async function continuePrompt(message: string): Promise<prompts.Answers<'value'>> {
   return await prompts(
     {
       type: 'toggle',
       name: 'value',
-      message: 'Continue?',
+      message,
       initial: true,
       active: 'yes',
       inactive: 'exit',
     },
     promptsCancel,
   )
+}
+
+export async function getRecipientName(threadID: ThreadID): Promise<string> {
+  const api = getApi()
+
+  let recipient
+
+  try {
+    recipient = await api.getThreadInfo(threadID)
+  } catch {
+    try {
+      recipient = (await api.getUserInfo([threadID]))[threadID]
+    } catch {
+      throw formattedError('Unable to get recipient.')
+    }
+  }
+
+  let recipientName
+
+  if (isOfType<ThreadInfo>(recipient, 'threadName')) recipientName = recipient.threadName
+  if (isOfType<UserInfo>(recipient, 'fullName')) recipientName = recipient.fullName
+  if (!recipientName) throw formattedError('Unable to get recipient name.')
+
+  return recipientName
 }

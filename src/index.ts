@@ -3,22 +3,19 @@ import handleConfig, { finishConfig } from './config'
 import scheduleMessage, { buildCronExpression } from './cron'
 import exit from './exit'
 import login from './login'
+import getThreads from './threads'
 import getSendTime, { getFormattedTime } from './time'
 import { cBold, cData, cInfo, cName, cTime } from './util/chalk-names'
-import { formattedError, likeSticker, likeStickerAlias, log, shouldContinue, welcomeMessage } from './util/util'
+import { continuePrompt, getRecipientName, likeSticker, likeStickerAlias, log, welcomeMessage } from './util/util'
 
 async function main() {
   let config = handleConfig()
   log(welcomeMessage)
-  const api = await login()
+  await login()
+  if (!config.THREAD_ID) await getThreads()
   config = await finishConfig()
 
-  const threadInfo = await api.getThreadInfo(config.THREAD_ID).catch(() => {
-    throw formattedError('Unable to get thread info.')
-  })
-  const userInfo = await api.getUserInfo([threadInfo.threadId])
-  const userFullName = userInfo[threadInfo.threadId] ? userInfo[threadInfo.threadId].fullName : 'FULL_NAME'
-  const recipient = threadInfo.threadName ? threadInfo.threadName : userFullName
+  const recipient = await getRecipientName(config.THREAD_ID)
   const logMessage = config.MESSAGE === likeStickerAlias ? '(like/thumbs-up sticker)' : config.MESSAGE
   const { sendTime, sendTimeFormatted } = getSendTime()
 
@@ -27,7 +24,7 @@ async function main() {
   )
   log(c`{${cData} ${logMessage}}\n`)
 
-  if (!(await shouldContinue())) await exit()
+  if (!(await continuePrompt('Continue?')).value) await exit()
 
   log(c`\nMessage will be sent at {${cTime} ${sendTimeFormatted}}.`)
   log(
@@ -40,13 +37,8 @@ async function main() {
     recipient,
     outgoingMessage: config.MESSAGE === `${likeStickerAlias}` ? { sticker: likeSticker } : { body: config.MESSAGE },
   }
+
   scheduleMessage(cronExpression, messageInfo)
-
-  const listener = await api.listen()
-
-  listener.addListener('message', (message) => {
-    log(message)
-  })
 }
 
 void main()
