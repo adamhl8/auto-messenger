@@ -3,8 +3,8 @@ import prompts from 'prompts'
 import fbLogin from 'ts-messenger-api'
 import Api from 'ts-messenger-api/dist/lib/api'
 import { getAndSetConfig } from './config'
-import { cCaution, cInfo, cSuccess } from './util/chalk-names'
-import { isOfType, log, promptsCancel } from './util/util'
+import { cCaution, cError, cInfo, cSuccess } from './util/chalk-names'
+import { formattedError, isOfType, log, promptsCancel } from './util/util'
 
 let api: Api
 
@@ -18,6 +18,12 @@ export default async function login(): Promise<Api> {
     if (!loginResult) continue
     api = loginResult
   }
+
+  await api.listen()
+  if (!api.isActive() || !api.listener) throw formattedError('Unable to establish connection to Facebook.')
+  api.listener.addListener('error', (error) => {
+    log(c`{${cError} ${error}}`)
+  })
 
   const config = getAndSetConfig()
   log(c`Logged in as {${cSuccess} ${config.EMAIL}}\n`)
@@ -54,7 +60,7 @@ async function tryLogin() {
   if (loginResponses.email) config.EMAIL = loginResponses.email as typeof config.EMAIL
   if (loginResponses.password) config.PASSWORD = loginResponses.password as typeof config.PASSWORD
 
-  log(c`\n{${cInfo} Logging in...}`)
+  log(c`{${cInfo} Logging in...}`)
   const loginResult = await fbLogin(
     {
       email: config.EMAIL,
