@@ -8,7 +8,7 @@ export interface configInterface {
   [key: string]: string | number
   EMAIL: string
   PASSWORD: string
-  THREAD_ID: string
+  THREAD_ID: number
   MESSAGE: string
   TIME: string
   MAX_DELAY_MINUTES: number
@@ -17,7 +17,7 @@ export interface configInterface {
 let config: configInterface = {
   EMAIL: '',
   PASSWORD: '',
-  THREAD_ID: '',
+  THREAD_ID: 0,
   MESSAGE: '',
   TIME: '',
   MAX_DELAY_MINUTES: 0,
