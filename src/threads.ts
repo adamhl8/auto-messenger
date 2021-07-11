@@ -1,7 +1,6 @@
 import c from 'chalk'
 import prompts from 'prompts'
 import { getAndSetConfig } from './config'
-import exit from './exit'
 import { getApi } from './login'
 import { cInfo, cName, cProperty } from './util/chalk-names'
 import { continuePrompt, formattedError, getRecipientName, isOfType, log, promptsCancel } from './util/util'
@@ -10,10 +9,18 @@ export default async function getThreads(): Promise<void> {
   log(c`{${cInfo} No thread ID was provided.}`)
   log('Currently the only way to get thread IDs is to monitor incoming messages.')
   log(
-    'auto-messenger will build a list of thread IDs from incoming messages that are sent after you continue. (Have the person/group send a message to you.)',
+    'auto-messenger will build a list of thread IDs from incoming messages that are sent after you continue. (Have the user/group send a message to you.)',
   )
 
-  if (!(await continuePrompt('Start monitoring messages to get thread IDs?')).value) await exit()
+  if (
+    !(
+      await continuePrompt('Start monitoring messages to get thread IDs?', {
+        active: 'yes',
+        inactive: 'no (enter thread ID manually)',
+      })
+    ).value
+  )
+    return
 
   const api = getApi()
   if (!api.isActive() || !api.listener) throw formattedError('Unable to establish connection to Facebook.')

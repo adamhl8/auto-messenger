@@ -30,12 +30,12 @@ async function main() {
   log(
     c`{${cBold}.${cInfo} Please do not close this window.} It must remain open and you must have an internet connection.`,
   )
-  log('...')
+  log('...\n')
 
   const cronExpression = buildCronExpression(sendTime)
   const messageInfo = {
     recipient,
-    outgoingMessage: config.MESSAGE === `${likeStickerAlias}` ? { sticker: likeSticker } : { body: config.MESSAGE },
+    outgoingMessage: config.MESSAGE === likeStickerAlias ? { sticker: likeSticker } : { body: config.MESSAGE },
   }
 
   scheduleMessage(cronExpression, messageInfo)

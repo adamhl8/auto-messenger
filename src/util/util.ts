@@ -34,15 +34,22 @@ export function formattedError(error: string): Error {
 
 export const promptsCancel = { onCancel: async (): Promise<void> => await exit() }
 
-export async function continuePrompt(message: string): Promise<prompts.Answers<'value'>> {
+interface continuePromptOptions {
+  active: string
+  inactive: string
+}
+export async function continuePrompt(
+  message: string,
+  options?: continuePromptOptions,
+): Promise<prompts.Answers<'value'>> {
   return await prompts(
     {
       type: 'toggle',
       name: 'value',
       message,
       initial: true,
-      active: 'yes',
-      inactive: 'exit',
+      active: options ? options.active : 'yes',
+      inactive: options ? options.inactive : 'exit',
     },
     promptsCancel,
   )

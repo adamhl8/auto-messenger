@@ -58,7 +58,7 @@ export async function finishConfig(): Promise<configInterface> {
     {
       type: !config.THREAD_ID ? 'number' : undefined,
       name: 'threadID',
-      message: 'Enter the thread ID. This is where your message will be sent.',
+      message: 'Enter the thread ID. Your message will be sent to this user/group.',
     },
     {
       type: !config.MESSAGE ? 'text' : undefined,
@@ -71,14 +71,14 @@ export async function finishConfig(): Promise<configInterface> {
       name: 'time',
       message:
         'Enter the time you want the message to be sent (random delay is added on top of this).\nMust be in 24h time format. e.g. 0530, 1730, etc.',
-      validate: (time: string) => validateTime(time),
+      validate: (time) => validateTime(time),
     },
     {
       type: !config.MAX_DELAY_MINUTES ? 'number' : undefined,
       name: 'delay',
       message: 'Enter the maximum number of minutes for the randomized delay. (Must be less than 60)',
       initial: 10,
-      validate: (delay: number) => validateDelay(delay),
+      validate: (delay) => validateDelay(delay),
     },
   ]
 
