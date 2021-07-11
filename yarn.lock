@@ -423,10 +423,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^16.0.1":
-  version: 16.0.1
-  resolution: "@types/node@npm:16.0.1"
-  checksum: 0f3d559689763cef9c2cf593a9190ead7adc8b71aeaef5c446bda96a781c22e39806780ee240c7272dddf01b82008d84e49a4298fba88b6d7726af76f00fc3ad
+"@types/node@npm:^16.3.1":
+  version: 16.3.1
+  resolution: "@types/node@npm:16.3.1"
+  checksum: 2021138afd66a9235f4b64e412dd8a8d1199f3d17303c2868ab062a10214ba76b793bf4f59e14c3bf981623e099843855776390b445d840779cb171c2fcb97a9
   languageName: node
   linkType: hard
 
@@ -722,7 +722,7 @@ __metadata:
   resolution: "auto-messenger@workspace:."
   dependencies:
     "@types/eslint": ^7.2.14
-    "@types/node": ^16.0.1
+    "@types/node": ^16.3.1
     "@types/node-cron": ^2.0.4
     "@types/prettier": ^2.3.2
     "@types/prompts": ^2.0.14

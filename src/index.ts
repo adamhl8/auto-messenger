@@ -1,5 +1,5 @@
 import c from 'chalk'
-import handleConfig, { finishConfig } from './config'
+import handleConfig, { finishConfig, getConfig } from './config'
 import scheduleMessage, { buildCronExpression } from './cron'
 import exit from './exit'
 import login from './login'
@@ -9,36 +9,31 @@ import { cBold, cData, cInfo, cName, cTime } from './util/chalk-names'
 import { continuePrompt, getRecipientName, likeSticker, likeStickerAlias, log, welcomeMessage } from './util/util'
 
 async function main() {
-  let config = handleConfig()
-  log(welcomeMessage)
-  await login()
-  if (!config.THREAD_ID) await getThreads()
-  config = await finishConfig()
+	handleConfig()
+	log(welcomeMessage)
+	await login()
+	if (!getConfig('threadID')) await getThreads()
+	await finishConfig()
 
-  const recipient = await getRecipientName(config.THREAD_ID)
-  const logMessage = config.MESSAGE === likeStickerAlias ? '(like/thumbs-up sticker)' : config.MESSAGE
-  const { sendTime, sendTimeFormatted } = getSendTime()
+	const recipientName = await getRecipientName(getConfig('threadID'))
+	const { sendTime, sendTimeFormatted } = getSendTime()
+	const logMessage = getConfig('message') === likeStickerAlias ? '(like/thumbs-up sticker)' : getConfig('message')
+	log(
+		c`\nIf you continue, the following message will be sent to {${cName} ${recipientName}} at {${cTime} ${sendTimeFormatted}}. Current time is {${cTime} ${getFormattedTime()}}.`,
+	)
+	log(c`{${cData} ${logMessage}}\n`)
 
-  log(
-    c`\nIf you continue, the following message will be sent to {${cName} ${recipient}} at {${cTime} ${sendTimeFormatted}}. Current time is {${cTime} ${getFormattedTime()}}.`,
-  )
-  log(c`{${cData} ${logMessage}}\n`)
+	if (!(await continuePrompt('Continue?')).value) await exit()
 
-  if (!(await continuePrompt('Continue?')).value) await exit()
+	log(c`\nMessage will be sent at {${cTime} ${sendTimeFormatted}}.`)
+	log(
+		c`{${cBold}.${cInfo} Please do not close this window.} It must remain open and you must have an internet connection.`,
+	)
+	log('...')
 
-  log(c`\nMessage will be sent at {${cTime} ${sendTimeFormatted}}.`)
-  log(
-    c`{${cBold}.${cInfo} Please do not close this window.} It must remain open and you must have an internet connection.`,
-  )
-  log('...\n')
-
-  const cronExpression = buildCronExpression(sendTime)
-  const messageInfo = {
-    recipient,
-    outgoingMessage: config.MESSAGE === likeStickerAlias ? { sticker: likeSticker } : { body: config.MESSAGE },
-  }
-
-  scheduleMessage(cronExpression, messageInfo)
+	const cronExpression = buildCronExpression(sendTime)
+	const message = getConfig('message') === likeStickerAlias ? { sticker: likeSticker } : { body: getConfig('message') }
+	scheduleMessage(cronExpression, message)
 }
 
 void main()
