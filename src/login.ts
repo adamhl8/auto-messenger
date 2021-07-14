@@ -9,62 +9,62 @@ import { formattedError, isOfTypeString, log, objectHasPropertyOfType, promptsCa
 let api: Api
 
 export function getApi(): Api {
-	return api
+  return api
 }
 
 export default async function login(): Promise<void> {
-	while (!api) {
-		const loginResult = await tryLogin()
-		if (!loginResult) continue
-		api = loginResult
-	}
+  while (!api) {
+    const loginResult = await tryLogin()
+    if (!loginResult) continue
+    api = loginResult
+  }
 
-	await api.listen()
-	if (!api.isActive() || !api.listener) throw formattedError('Unable to establish connection to Facebook.')
-	api.listener.addListener('error', (error) => {
-		log(c`{${cError} ${error}}`)
-	})
+  await api.listen()
+  if (!api.isActive() || !api.listener) throw formattedError('Unable to establish connection to Facebook.')
+  api.listener.addListener('error', (error) => {
+    log(c`{${cError} ${error}}`)
+  })
 
-	log(c`Logged in as {${cSuccess} ${getConfig('email')}}\n`)
+  log(c`Logged in as {${cSuccess} ${getConfig('email')}}\n`)
 }
 
 let initialEmail = ''
 
 async function tryLogin() {
-	if (!initialEmail) initialEmail = getConfig('email')
+  if (!initialEmail) initialEmail = getConfig('email')
 
-	const loginPrompts: prompts.PromptObject<string>[] = [
-		{
-			type: !getConfig('email') ? 'text' : undefined,
-			name: 'email',
-			message: 'Enter your Facebook login email.',
-			initial: initialEmail,
-		},
-		{
-			type: 'password',
-			name: 'password',
-			message: 'Enter your Facebook password.',
-		},
-	]
+  const loginPrompts: prompts.PromptObject<string>[] = [
+    {
+      type: !getConfig('email') ? 'text' : undefined,
+      name: 'email',
+      message: 'Enter your Facebook login email.',
+      initial: initialEmail,
+    },
+    {
+      type: 'password',
+      name: 'password',
+      message: 'Enter your Facebook password.',
+    },
+  ]
 
-	const loginResponses = await prompts(loginPrompts, promptsCancel)
+  const loginResponses = await prompts(loginPrompts, promptsCancel)
 
-	if (loginResponses.email && isOfTypeString(loginResponses.email)) setConfig('email', loginResponses.email)
-	let password = ''
-	if (loginResponses.password && isOfTypeString(loginResponses.password)) password = loginResponses.password
+  if (loginResponses.email && isOfTypeString(loginResponses.email)) setConfig('email', loginResponses.email)
+  let password = ''
+  if (loginResponses.password && isOfTypeString(loginResponses.password)) password = loginResponses.password
 
-	log(c`{${cInfo} Logging in...}`)
-	return await fbLogin(
-		{
-			email: getConfig('email'),
-			password,
-		},
-		{ logLevel: 'silent' },
-	).catch((error) => {
-		// On invalid username/password, ts-messenger-api throws an object with one key/value pair: { error: 'Wrong username/password.' }
-		if (objectHasPropertyOfType<string, string>(error, 'error')) {
-			log(c`{${cCaution} ${error.error}}`)
-			setConfig('email', '')
-		} else throw error
-	})
+  log(c`{${cInfo} Logging in...}`)
+  return await fbLogin(
+    {
+      email: getConfig('email'),
+      password,
+    },
+    { logLevel: 'silent' },
+  ).catch((error) => {
+    // On invalid username/password, ts-messenger-api throws an object with one key/value pair: { error: 'Wrong username/password.' }
+    if (objectHasPropertyOfType<string, string>(error, 'error')) {
+      log(c`{${cCaution} ${error.error}}`)
+      setConfig('email', '')
+    } else throw error
+  })
 }

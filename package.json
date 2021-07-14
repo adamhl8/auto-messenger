@@ -1,44 +1,44 @@
 {
-	"name": "auto-messenger",
-	"version": "0.1.0",
-	"description": "",
-	"repository": "github:adamhl8/auto-messenger",
-	"license": "MIT",
-	"engines": {
-		"node": ">=14"
-	},
-	"scripts": {
-		"lint": "eslint -f pretty --fix .",
-		"pkg": "tsc && pkg dist/index.js -t node16-win-x64,node16-macos-x64,node16-linux-x64 -C GZip --out-path ./pkg",
-		"prettier": "prettier --write .",
-		"start": "tsc && node --enable-source-maps dist/index.js"
-	},
-	"dependencies": {
-		"chalk": "^4.1.1",
-		"dayjs": "^1.10.6",
-		"dotenv": "^10.0.0",
-		"node-cron": "^3.0.0",
-		"prompts": "^2.4.1",
-		"ts-messenger-api": "^1.0.3"
-	},
-	"devDependencies": {
-		"@types/eslint": "^7.2.14",
-		"@types/node": "^16.3.1",
-		"@types/node-cron": "^2.0.4",
-		"@types/prettier": "^2.3.2",
-		"@types/prompts": "^2.0.14",
-		"@typescript-eslint/eslint-plugin": "^4.28.2",
-		"@typescript-eslint/parser": "^4.28.2",
-		"eslint": "^7.30.0",
-		"eslint-config-prettier": "^8.3.0",
-		"eslint-formatter-pretty": "^4.1.0",
-		"eslint-plugin-eslint-comments": "^3.2.0",
-		"eslint-plugin-sonarjs": "^0.9.1",
-		"eslint-plugin-unicorn": "^34.0.1",
-		"prettier": "^2.3.2",
-		"prettier-plugin-organize-imports": "^2.2.0",
-		"prettier-plugin-pkg": "^0.10.0",
-		"prettier-plugin-sh": "^0.7.1",
-		"typescript": "^4.3.5"
-	}
+  "name": "auto-messenger",
+  "version": "0.1.0",
+  "description": "",
+  "repository": "github:adamhl8/auto-messenger",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14"
+  },
+  "scripts": {
+    "lint": "eslint -f pretty --fix .",
+    "pkg": "tsc && pkg dist/index.js -t node16-win-x64,node16-macos-x64,node16-linux-x64 -C GZip --out-path ./pkg",
+    "prettier": "prettier --write .",
+    "start": "tsc && node --enable-source-maps dist/index.js"
+  },
+  "dependencies": {
+    "chalk": "^4.1.1",
+    "dayjs": "^1.10.6",
+    "dotenv": "^10.0.0",
+    "node-cron": "^3.0.0",
+    "prompts": "^2.4.1",
+    "ts-messenger-api": "^1.0.3"
+  },
+  "devDependencies": {
+    "@types/eslint": "^7.2.14",
+    "@types/node": "^16.3.1",
+    "@types/node-cron": "^2.0.4",
+    "@types/prettier": "^2.3.2",
+    "@types/prompts": "^2.0.14",
+    "@typescript-eslint/eslint-plugin": "^4.28.2",
+    "@typescript-eslint/parser": "^4.28.2",
+    "eslint": "^7.30.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-formatter-pretty": "^4.1.0",
+    "eslint-plugin-eslint-comments": "^3.2.0",
+    "eslint-plugin-sonarjs": "^0.9.1",
+    "eslint-plugin-unicorn": "^34.0.1",
+    "prettier": "^2.3.2",
+    "prettier-plugin-organize-imports": "^2.2.0",
+    "prettier-plugin-pkg": "^0.10.0",
+    "prettier-plugin-sh": "^0.7.1",
+    "typescript": "^4.3.5"
+  }
 }
