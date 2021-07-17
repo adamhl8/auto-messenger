@@ -23,13 +23,13 @@
     "ts-messenger-api": "^1.0.3"
   },
   "devDependencies": {
-    "@types/eslint": "^7.2.14",
-    "@types/node": "^16.3.1",
+    "@types/eslint": "^7.28.0",
+    "@types/node": "^16.3.3",
     "@types/node-cron": "^2.0.4",
     "@types/prettier": "^2.3.2",
     "@types/prompts": "^2.0.14",
-    "@typescript-eslint/eslint-plugin": "^4.28.2",
-    "@typescript-eslint/parser": "^4.28.2",
+    "@typescript-eslint/eslint-plugin": "^4.28.3",
+    "@typescript-eslint/parser": "^4.28.3",
     "eslint": "^7.30.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-formatter-pretty": "^4.1.0",
