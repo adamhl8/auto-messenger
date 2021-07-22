@@ -1,4 +1,5 @@
 node_modules
 dist
-config.txt
 pkg
+config.txt
+app-state.json

@@ -32,6 +32,13 @@ export function isOfTypeString(toBeChecked: unknown): toBeChecked is string {
   return typeof toBeChecked === 'string'
 }
 
+export function isOfTypeError(toBeChecked: unknown): toBeChecked is Error {
+  return (
+    objectHasPropertyOfType<string, string>(toBeChecked, 'name') &&
+    objectHasPropertyOfType<string, string>(toBeChecked, 'message')
+  )
+}
+
 export function validateTime(time: string): boolean | string {
   return timeRegex.test(time) && time.length === 4 ? true : 'Not a valid time.'
 }
@@ -47,8 +54,8 @@ export function formattedError(error: string): Error {
 export const promptsCancel = { onCancel: async (): Promise<void> => await exit() }
 
 interface continuePromptOptions {
-  active: string
-  inactive: string
+  active?: string
+  inactive?: string
 }
 export async function continuePrompt(
   message: string,
@@ -60,8 +67,8 @@ export async function continuePrompt(
       name: 'value',
       message,
       initial: true,
-      active: options ? options.active : 'yes',
-      inactive: options ? options.inactive : 'exit',
+      active: options?.active ? options.active : 'yes',
+      inactive: options?.inactive ? options.inactive : 'exit',
     },
     promptsCancel,
   )

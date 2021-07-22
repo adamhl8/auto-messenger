@@ -24,7 +24,6 @@ export default async function getThreads(): Promise<void> {
   if (
     !(
       await continuePrompt('Start monitoring messages to get thread IDs?', {
-        active: 'yes',
         inactive: 'no (enter thread ID manually)',
       })
     ).value
