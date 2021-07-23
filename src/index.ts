@@ -23,7 +23,7 @@ async function main() {
   )
   log(c`{${cData} ${logMessage}}\n`)
 
-  if (!(await continuePrompt('Continue?')).value) await exit()
+  if (!(await continuePrompt('Continue?'))) await exit()
 
   log(c`\nMessage will be sent at {${cTime} ${sendTimeFormatted}}.`)
   log(

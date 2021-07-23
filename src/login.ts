@@ -104,25 +104,42 @@ let forceLogin = false
 
 async function apiLogin(loginData: LoginCredentials) {
   return await fbLogin(loginData, { logLevel: 'silent', forceLogin }).catch(async (error) => {
-    // On invalid email/password, ts-messenger-api throws an object with one key/value pair: { error: 'Wrong username/password.' }
-    if (objectHasPropertyOfType<string, string>(error, 'error')) {
-      log(c`{${cCaution} Wrong email/password.}`)
-      setConfig('email', '')
-    } else if (isOfTypeError(error) && error.message.includes('Error retrieving userID')) {
-      if (forceLogin) {
-        log(
-          c`\n{${cCaution} Failed to login. Please check your Facebook security/login settings and disable 2FA if needed.}\n`,
-        )
-        await exit()
-      }
-
-      log(c`{${cCaution} Failed to login. You either have 2FA enabled or are logging in from an unknown location.}\n`)
-      log(
-        c`{${cInfo} Try again with a force login?}\n{${cCaution} This will automatically approve of any recent logins and continue with the login process.}`,
-      )
-
-      if ((await continuePrompt('Try a force login on next attempt?')).value) forceLogin = true
-      else await exit()
-    } else log(c`{${cCaution} Failed to login:\n${error}}\n`)
+    await handleLoginErrors(error)
   })
+}
+
+async function handleLoginErrors(error: unknown) {
+  let errorMatch = false
+
+  // On invalid email/password, ts-messenger-api throws an object with one key/value pair: { error: 'Wrong username/password.' }
+  if (objectHasPropertyOfType<string, string>(error, 'error')) {
+    errorMatch = true
+
+    log(c`{${cCaution} Wrong email/password.}`)
+    setConfig('email', '')
+  }
+
+  // ts-messenger-api throws an Error with a message that starts with 'Error retrieving userID' when Facebook blocks the login due to 2FA or an unrecognized location.
+  if (isOfTypeError(error) && error.message.includes('Error retrieving userID')) {
+    errorMatch = true
+
+    if (forceLogin) {
+      log(
+        c`\n{${cCaution} Failed to login. Please check your Facebook security/login settings and disable 2FA if needed.}\n`,
+      )
+      await exit()
+    }
+
+    log(c`{${cCaution} Failed to login. You either have 2FA enabled or are logging in from an unknown location.}\n`)
+    log(
+      c`{${cInfo} Try again with a force login?}\n{${cCaution} This will automatically approve of any recent logins and continue with the login process.}`,
+    )
+
+    if (await continuePrompt('Try a force login on next attempt?')) forceLogin = true
+    else await exit()
+  }
+
+  if (!errorMatch) log(c`{${cCaution} Failed to login:\n${error}}\n`)
+
+  return errorMatch
 }

@@ -32,6 +32,10 @@ export function isOfTypeString(toBeChecked: unknown): toBeChecked is string {
   return typeof toBeChecked === 'string'
 }
 
+export function isOfTypeBoolean(toBeChecked: unknown): toBeChecked is boolean {
+  return typeof toBeChecked === 'boolean'
+}
+
 export function isOfTypeError(toBeChecked: unknown): toBeChecked is Error {
   return (
     objectHasPropertyOfType<string, string>(toBeChecked, 'name') &&
@@ -57,11 +61,8 @@ interface continuePromptOptions {
   active?: string
   inactive?: string
 }
-export async function continuePrompt(
-  message: string,
-  options?: continuePromptOptions,
-): Promise<prompts.Answers<'value'>> {
-  return await prompts(
+export async function continuePrompt(message: string, options?: continuePromptOptions): Promise<boolean> {
+  const response = await prompts(
     {
       type: 'toggle',
       name: 'value',
@@ -72,6 +73,8 @@ export async function continuePrompt(
     },
     promptsCancel,
   )
+
+  return isOfTypeBoolean(response.value) ? response.value : false
 }
 
 export async function getRecipientName(threadID: ThreadID): Promise<string> {

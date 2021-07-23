@@ -22,11 +22,9 @@ export default async function getThreads(): Promise<void> {
   log('You will be able to pick the message recipient by name/group name.\n')
 
   if (
-    !(
-      await continuePrompt('Start monitoring messages to get thread IDs?', {
-        inactive: 'no (enter thread ID manually)',
-      })
-    ).value
+    !(await continuePrompt('Start monitoring messages to get thread IDs?', {
+      inactive: 'no (enter thread ID manually)',
+    }))
   )
     return
 
