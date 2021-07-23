@@ -10,7 +10,7 @@ export const log = console.log
 export const likeSticker = 369_239_263_222_822
 export const likeStickerAlias = 'like'
 
-export const welcomeMessage = c`\n{${cBold}.${cInfo} Welcome to auto-messenger.}
+export const welcomeMessage = c`{${cBold}.${cInfo} Welcome to auto-messenger.}
 This program allows you to automatically send a message (with a short randomized delay) to another Facebook user/chat group at a chosen time.
 You will automatically be logged out once your scheduled message is sent. Simply reopen the program to schedule another message.
 For more info/help, please see the GitHub repo: {${cBold}.${cName} https://github.com/adamhl8/auto-messenger}\n`

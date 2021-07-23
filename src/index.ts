@@ -9,8 +9,8 @@ import { cBold, cData, cInfo, cName, cTime } from './util/chalk-names'
 import { continuePrompt, getRecipientName, likeSticker, likeStickerAlias, log, welcomeMessage } from './util/util'
 
 async function main() {
-  handleConfig()
   log(welcomeMessage)
+  await handleConfig()
   await login()
   if (!getConfig('threadID')) await getThreads()
   await finishConfig()

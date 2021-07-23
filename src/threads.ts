@@ -1,7 +1,7 @@
 import c from 'chalk'
 import prompts from 'prompts'
 import { ThreadID } from 'ts-messenger-api/dist/lib/types/threads'
-import { getConfig, setConfig, wasConfigInitialized } from './config'
+import { getConfig, setConfig, wasConfigSet } from './config'
 import { getApi } from './login'
 import { cInfo, cName, cProperty } from './util/chalk-names'
 import {
@@ -14,7 +14,7 @@ import {
 } from './util/util'
 
 export default async function getThreads(): Promise<void> {
-  if (wasConfigInitialized()) log(c`{${cInfo} No thread ID was provided.}`)
+  if (wasConfigSet()) log(c`{${cInfo} No thread ID was provided.}`) // We only want to log this if a config.txt is provided but no threadID is set.
   log(c`{${cInfo} In order to send a message, the unique thread ID for the recipient user/group is needed.}`)
   log(
     '\nBy monitoring incoming messages, auto-messenger will build a list of thread IDs. (Have the user/group send a message to you, or simply wait for a message to be sent.)',

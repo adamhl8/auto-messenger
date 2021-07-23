@@ -1,8 +1,6 @@
 import c from 'chalk'
-import dotenv from 'dotenv'
-import prompts from 'prompts'
-import { cBold, cCaution, cProperty } from './util/chalk-names'
 import {
+  continuePrompt,
   isOfTypeNumber,
   isOfTypeString,
   likeStickerAlias,
@@ -11,6 +9,10 @@ import {
   validateMaxDelayMinutes,
   validateTime,
 } from './util/util'
+import dotenv from 'dotenv'
+import prompts from 'prompts'
+import envfile from 'envfile'
+import { cBold, cCaution, cInfo, cProperty } from './util/chalk-names'
 
 interface ConfigOptions {
   email: string
@@ -40,39 +42,60 @@ function isConfigKey(key: string): key is keyof ConfigOptions {
   return Object.keys(config).includes(key)
 }
 
-export function isConfigSet(): boolean {
-  for (const property in config) {
-    if (!isConfigKey(property)) continue
-
-    if (config[property]) return true
-  }
-
-  return false
-}
-
-let configWasInitialized = false
-export function wasConfigInitialized(): boolean {
-  return configWasInitialized
-}
-
-export default function handleConfig(): void {
+export default async function handleConfig(): Promise<void> {
   const parsed = dotenv.config({ path: 'config.txt' }).parsed
 
   if (parsed) {
-    for (const property in config) {
-      if (!isConfigKey(property)) continue
+    isConfigSet = true
 
-      if (Object.prototype.hasOwnProperty.call(parsed, property)) setConfig(property, parsed[property])
+    log(c`{${cInfo} Found config.txt.}`)
+    const response = await continuePrompt('Do you want to use the values from your config?', {
+      inactive: 'no (manually input settings)',
+    })
+
+    if (!response) return
+
+    parseConfig(parsed)
+  }
+
+  if (isConfigSet) logConfigInfo()
+}
+
+let isConfigSet = false
+export function wasConfigSet(): boolean {
+  return isConfigSet
+}
+
+function parseConfig(parsed: dotenv.DotenvParseOutput) {
+  for (const property in config) {
+    if (!isConfigKey(property)) continue
+
+    if (Object.prototype.hasOwnProperty.call(parsed, property)) {
+      setConfig(property, parsed[property])
     }
   }
 
   if (validateTime(getConfig('time')) !== true) setConfig('time', '')
   if (validateMaxDelayMinutes(getConfig('maxDelayMinutes')) !== true) setConfig('maxDelayMinutes', 0)
+}
 
-  if (isConfigSet()) {
-    configWasInitialized = true
-    logConfigInfo()
+function logConfigInfo() {
+  log(c`\n{${cBold} Using the following values from config.txt:}\n`)
+
+  const skipped = []
+
+  for (const property in config) {
+    if (!isConfigKey(property)) continue
+    if (config[property]) log(c`${property}: {${cProperty} ${config[property]}}`)
+    else skipped.push(property)
   }
+
+  if (skipped.length > 0)
+    log(c`{${cBold} \nThe following values are either missing or invalid (you will be prompted for them):}`)
+
+  for (const element of skipped) log(c`{${cCaution} ${element}}`)
+
+  log('')
 }
 
 export async function finishConfig(): Promise<void> {
@@ -112,21 +135,4 @@ export async function finishConfig(): Promise<void> {
   if (configResponses.time && isOfTypeString(configResponses.time)) setConfig('time', configResponses.time)
   if (configResponses.maxDelayMinutes && isOfTypeNumber(configResponses.maxDelayMinutes))
     setConfig('maxDelayMinutes', configResponses.maxDelayMinutes)
-}
-
-function logConfigInfo() {
-  log(c`\n{${cBold} Using the following values from config.txt:}`)
-
-  const skipped = []
-
-  for (const property in config) {
-    if (!isConfigKey(property)) continue
-    if (config[property]) log(c`${property}: {${cProperty} ${config[property]}}`)
-    else skipped.push(property)
-  }
-
-  if (skipped.length > 0)
-    log(c`{${cBold} \nThe following values are either missing or invalid (you will be prompted for them):}`)
-
-  for (const element of skipped) log(c`{${cCaution} ${element}}`)
 }
