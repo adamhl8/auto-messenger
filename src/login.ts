@@ -1,11 +1,12 @@
 import c from 'chalk'
-import prompts from 'prompts'
 // eslint-disable-next-line unicorn/prefer-node-protocol
 import fs from 'fs'
+import prompts from 'prompts'
 import fbLogin from 'ts-messenger-api'
 import Api from 'ts-messenger-api/dist/lib/api'
-import { LoginCredentials, AppState } from 'ts-messenger-api/dist/lib/types'
+import { AppState, LoginCredentials } from 'ts-messenger-api/dist/lib/types'
 import { getConfig, setConfig } from './config'
+import exit from './exit'
 import { cCaution, cError, cInfo, cSuccess } from './util/chalk-names'
 import {
   continuePrompt,
@@ -16,7 +17,6 @@ import {
   objectHasPropertyOfType,
   promptsCancel,
 } from './util/util'
-import exit from './exit'
 
 let api: Api
 

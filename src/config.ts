@@ -1,4 +1,10 @@
 import c from 'chalk'
+import dotenv from 'dotenv'
+import * as envfile from 'envfile'
+// eslint-disable-next-line unicorn/prefer-node-protocol
+import fs from 'fs'
+import prompts from 'prompts'
+import { cBold, cCaution, cInfo, cProperty } from './util/chalk-names'
 import {
   continuePrompt,
   isOfTypeNumber,
@@ -9,12 +15,6 @@ import {
   validateMaxDelayMinutes,
   validateTime,
 } from './util/util'
-import dotenv from 'dotenv'
-import prompts from 'prompts'
-import * as envfile from 'envfile'
-import { cBold, cCaution, cInfo, cProperty } from './util/chalk-names'
-// eslint-disable-next-line unicorn/prefer-node-protocol
-import fs from 'fs'
 
 const configFileName = 'config.txt'
 
