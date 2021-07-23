@@ -11,8 +11,12 @@ import {
 } from './util/util'
 import dotenv from 'dotenv'
 import prompts from 'prompts'
-import envfile from 'envfile'
+import * as envfile from 'envfile'
 import { cBold, cCaution, cInfo, cProperty } from './util/chalk-names'
+// eslint-disable-next-line unicorn/prefer-node-protocol
+import fs from 'fs'
+
+const configFileName = 'config.txt'
 
 interface ConfigOptions {
   email: string
@@ -43,12 +47,12 @@ function isConfigKey(key: string): key is keyof ConfigOptions {
 }
 
 export default async function handleConfig(): Promise<void> {
-  const parsed = dotenv.config({ path: 'config.txt' }).parsed
+  const parsed = dotenv.config({ path: `${configFileName}` }).parsed
 
   if (parsed) {
     isConfigSet = true
 
-    log(c`{${cInfo} Found config.txt.}`)
+    log(c`{${cInfo} Found ${configFileName}.}`)
     const response = await continuePrompt('Do you want to use the values from your config?', {
       inactive: 'no (manually input settings)',
     })
@@ -80,7 +84,7 @@ function parseConfig(parsed: dotenv.DotenvParseOutput) {
 }
 
 function logConfigInfo() {
-  log(c`\n{${cBold} Using the following values from config.txt:}\n`)
+  log(c`\n{${cBold} Using the following values from ${configFileName}:}\n`)
 
   const skipped = []
 
@@ -135,4 +139,12 @@ export async function finishConfig(): Promise<void> {
   if (configResponses.time && isOfTypeString(configResponses.time)) setConfig('time', configResponses.time)
   if (configResponses.maxDelayMinutes && isOfTypeNumber(configResponses.maxDelayMinutes))
     setConfig('maxDelayMinutes', configResponses.maxDelayMinutes)
+
+  log('')
+
+  const response = await continuePrompt(`Do you want to save your config? (Will overwrite ${configFileName}.)`, {
+    inactive: 'no',
+  })
+
+  if (response) fs.writeFileSync('config.txt', envfile.stringify(config))
 }
