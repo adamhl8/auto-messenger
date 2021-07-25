@@ -93,8 +93,12 @@ export async function getRecipientName(threadID: ThreadID): Promise<string> {
     if (!threadInfo.threadName) throw formattedError('Unable to get thread name.')
     else return threadInfo.threadName
   } catch {
-    const userInfo = (await api.getUserInfo([threadID]))[threadID] // getUserInfo() takes an array of userIDs and returns an object of { userID: UserInfo, ... }.
-    if (userInfo.fullName) return userInfo.fullName // fullName should always exist on userInfo. Checking it in case of api error.
+    try {
+      const userInfo = (await api.getUserInfo([threadID]))[threadID] // getUserInfo() takes an array of userIDs and returns an object of { userID: UserInfo, ... }.
+      if (userInfo.fullName) return userInfo.fullName // fullName should always exist on userInfo. Checking it in case of api error.
+    } catch {
+      throw formattedError('Unable to get recipient name.')
+    }
   }
 
   throw formattedError('Unable to get recipient name.') // Throwing an error here to satisfy the compiler even though this is technically unreachable.

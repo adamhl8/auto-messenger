@@ -1,6 +1,5 @@
 import c from 'chalk'
-// eslint-disable-next-line unicorn/prefer-node-protocol
-import fs from 'fs'
+import fs from 'node:fs'
 import prompts from 'prompts'
 import fbLogin from 'ts-messenger-api'
 import Api from 'ts-messenger-api/dist/lib/api'

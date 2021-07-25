@@ -1,7 +1,7 @@
 {
   "name": "auto-messenger",
   "version": "0.1.0",
-  "description": "",
+  "description": "A CLI app for Facebook Messenger that allows you to send a message at a scheduled time.",
   "repository": "github:adamhl8/auto-messenger",
   "license": "MIT",
   "engines": {
@@ -25,7 +25,7 @@
   },
   "devDependencies": {
     "@types/eslint": "^7.28.0",
-    "@types/node": "^16.4.1",
+    "@types/node": "^16.4.2",
     "@types/node-cron": "^2.0.4",
     "@types/prettier": "^2.3.2",
     "@types/prompts": "^2.0.14",

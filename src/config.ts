@@ -1,8 +1,7 @@
 import c from 'chalk'
 import dotenv from 'dotenv'
 import * as envfile from 'envfile'
-// eslint-disable-next-line unicorn/prefer-node-protocol
-import fs from 'fs'
+import fs from 'node:fs'
 import prompts from 'prompts'
 import { cBold, cCaution, cInfo, cProperty } from './util/chalk-names'
 import {
@@ -50,8 +49,6 @@ export default async function handleConfig(): Promise<void> {
   const parsed = dotenv.config({ path: `${configFileName}` }).parsed
 
   if (parsed) {
-    isConfigSet = true
-
     log(c`{${cInfo} Found ${configFileName}.}`)
     const response = await continuePrompt('Do you want to use the values from your config?', {
       inactive: 'no (manually input settings)',
@@ -59,6 +56,7 @@ export default async function handleConfig(): Promise<void> {
 
     if (!response) return
 
+    isConfigSet = true
     parseConfig(parsed)
   }
 

@@ -29,6 +29,7 @@ async function main() {
   log(
     c`{${cBold}.${cInfo} Please do not close this window.} It must remain open and you must have an internet connection.`,
   )
+  log(c`{${cBold}.${cInfo} If your computer goes to sleep, your message will not send!}`)
   log('...')
 
   const cronExpression = buildCronExpression(sendTime)
